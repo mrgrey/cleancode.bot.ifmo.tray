@@ -18,51 +18,90 @@ namespace cleancode.bot.schedule.tray
         public TrayPopupForm()
         {
             InitializeComponent();
+            this._settings = Settings.Deserialize(Constants.SaveSettingsFileName);
+            _communicator = new Communicator(this._settings);
+            this.hideTimer.Tick += new EventHandler(hideTimer_Tick);
+
             this.Location = new Point(
                 Screen.PrimaryScreen.WorkingArea.Width - this.Width,
                 Screen.PrimaryScreen.WorkingArea.Height - this.Height);
-            this.LostFocus += new EventHandler(TrayPopupForm_LostFocus);
             _initTrayIcon();
         }
 
-        void TrayPopupForm_LostFocus(object sender, EventArgs e)
-        {
-            this.WindowState = FormWindowState.Minimized;
-            this.Hide();
-        }
-
+        #region Инициалзизация иконки в трее
         private void _initTrayIcon()
         {
             _trayIcon = new NotifyIcon();
             _trayIcon.Icon = new System.Drawing.Icon("icon.ico");
             _trayIcon.MouseDown += new MouseEventHandler(_trayIcon_MouseDown);
+            #region Инициализация контекстного меню
+            ContextMenu menu = new ContextMenu();
+            menu.MenuItems.Add(new MenuItem("Настройки", new EventHandler(_showSettingsEvent)));
+            menu.MenuItems.Add(new MenuItem("О программе", new EventHandler(_showAboutEvent)));
+            menu.MenuItems.Add(new MenuItem("Выход", new EventHandler(_exitEvent)));
+            _trayIcon.ContextMenu = menu;
+            #endregion
             _trayIcon.Visible = true;
         }
 
-        private void _tryLoadSettings()
+        private void _showSettingsEvent(object sender, EventArgs e)
         {
-            _settings = Settings.Deserialize(Constants.SaveSettingsFileName);
+            SettingsForm settingsForm = new SettingsForm(_settings,
+                delegate(Settings settings)
+                {
+                    _settings = settings;
+                    _communicator.Settings = settings;
+                });
+            settingsForm.ShowDialog();
         }
+
+        private void _showAboutEvent(object sender, EventArgs e)
+        {
+            string url = "http://cleancode.ru";
+            System.Diagnostics.Process.Start(url);
+        }
+
+        private void _exitEvent(object sender, EventArgs e)
+        {
+            if(MessageBox.Show("Вы действительно желаете выйти?", "Выход", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                Application.Exit();
+        }
+        #endregion
 
         void _trayIcon_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
-                //Load and show schedule
+                if (this._settings.IsEmpty())
+                    _showSettingsEvent(null, EventArgs.Empty);
+
+                //listBox1.Items.Add(_communicator.GetSchedule());
+
                 this.WindowState = FormWindowState.Normal;
                 this.Show();
                 this.Focus();
-                //_trayIcon.ShowBalloonTip(1000, "Schedule", "Hello world!", ToolTipIcon.Info);
-            }
-            else if (e.Button == MouseButtons.Right)
-            {
-
+                hideTimer.Enabled = true;
             }
         }
 
-        private void _showSettings()
+        #region Методы, отвечающие за скрытие формы
+        private void closeLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            SettingsForm settingsForm = new SettingsForm(_settings, delegate(Settings settings) { _settings = settings; });
+            _hideForm();
         }
+
+        void hideTimer_Tick(object sender, EventArgs e)
+        {
+            _hideForm();
+            this.hideTimer.Enabled = false;
+        }
+
+        void _hideForm()
+        {
+            this.hideTimer.Enabled = false;
+            this.WindowState = FormWindowState.Minimized;
+            this.Hide();
+        }
+        #endregion
     }
 }

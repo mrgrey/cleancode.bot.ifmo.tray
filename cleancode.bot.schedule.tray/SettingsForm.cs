@@ -30,8 +30,14 @@ namespace cleancode.bot.schedule.tray
 
         private void saveButton_Click(object sender, EventArgs e)
         {
+            //Set settings fields
+            this._settings.SceduleId = Constants.DefaultScheduleId;
+            this._settings.DatasourceUrl = Constants.DefaultDatasourceUrl;
+            this._settings.GroupId = this.groupTextBox.Text;
+
             this._settings.Serialize(Constants.SaveSettingsFileName);
             this._settingsTransferAction.Invoke(this._settings);
+            this.Close();
         }
     }
 }

@@ -28,6 +28,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
@@ -38,6 +42,9 @@
   <ItemGroup>
     <Compile Include="Communicator.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="DataSourceAnswer\AnswerData.cs" />
+    <Compile Include="DataSourceAnswer\Lesson.cs" />
+    <Compile Include="DataSourceAnswer\StatusEnum.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
