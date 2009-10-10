@@ -5,6 +5,8 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using cleancode.bot.schedule.tray.DataSourceAnswer;
+using System.Diagnostics;
 
 namespace cleancode.bot.schedule.tray
 {
@@ -18,7 +20,9 @@ namespace cleancode.bot.schedule.tray
         public TrayPopupForm()
         {
             InitializeComponent();
+            
             this._settings = Settings.Deserialize(Constants.SaveSettingsFileName);
+            this.groupLinkLabel.Text = this._settings.GroupId;
             _communicator = new Communicator(this._settings);
             this.hideTimer.Tick += new EventHandler(hideTimer_Tick);
 
@@ -51,6 +55,7 @@ namespace cleancode.bot.schedule.tray
                 {
                     _settings = settings;
                     _communicator.Settings = settings;
+                    groupLinkLabel.Text = settings.GroupId;
                 });
             settingsForm.ShowDialog();
         }
@@ -66,7 +71,6 @@ namespace cleancode.bot.schedule.tray
             if(MessageBox.Show("Вы действительно желаете выйти?", "Выход", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 Application.Exit();
         }
-        #endregion
 
         void _trayIcon_MouseDown(object sender, MouseEventArgs e)
         {
@@ -75,13 +79,80 @@ namespace cleancode.bot.schedule.tray
                 if (this._settings.IsEmpty())
                     _showSettingsEvent(null, EventArgs.Empty);
 
-                //listBox1.Items.Add(_communicator.GetSchedule());
+                _renderSchedule(_communicator.GetSchedule());
 
                 this.WindowState = FormWindowState.Normal;
                 this.Show();
                 this.Focus();
-                hideTimer.Enabled = true;
+                //hideTimer.Enabled = true;
             }
+        }
+        #endregion
+
+        private void _renderSchedule(AnswerData schedule)
+        {
+            this.WindowState = FormWindowState.Normal;
+            foreach (Lesson lesson in schedule.Lessons)
+            {
+                _renderLesson(lesson);
+            }
+            closeLinkLabel.BringToFront();
+            tomorrowLinkLabel.BringToFront();
+        }
+
+        private void _renderLesson(Lesson lesson)
+        {
+            int height = 25;
+
+            Panel lessonPanel = new Panel();
+            lessonPanel.Width = mainSchedulePanel.Width;
+            lessonPanel.Height = height;
+            //Time
+            Label timeLabel = new Label();
+            timeLabel.Location = new Point(0, 0);
+            timeLabel.Width = lessonPanel.Width / 5;
+            timeLabel.Height = lessonPanel.Height;
+            timeLabel.TextAlign = ContentAlignment.MiddleCenter;
+            timeLabel.BorderStyle = BorderStyle.Fixed3D;
+            timeLabel.BackColor = Color.White;
+            timeLabel.Text = lesson.Time;
+            lessonPanel.Controls.Add(timeLabel);
+            //Place
+            Label placeLabel = new Label();
+            placeLabel.Location = new Point(lessonPanel.Width / 5, 0);
+            placeLabel.Width = lessonPanel.Width / 5;
+            placeLabel.Height = lessonPanel.Height;
+            placeLabel.TextAlign = ContentAlignment.MiddleCenter;
+            placeLabel.BorderStyle = BorderStyle.Fixed3D;
+            placeLabel.BackColor = Color.White;
+            placeLabel.Text = lesson.Place;
+            lessonPanel.Controls.Add(placeLabel);
+            //Subject
+            TextBox subjectTextBox = new TextBox();
+            subjectTextBox.Multiline = true;
+            subjectTextBox.ScrollBars = ScrollBars.Vertical;
+            subjectTextBox.Location = new Point(lessonPanel.Width * 2 / 5, 0);
+            subjectTextBox.Width = lessonPanel.Width * 2 / 5;
+            subjectTextBox.Height = lessonPanel.Height;
+            subjectTextBox.TextAlign = HorizontalAlignment.Left;
+            subjectTextBox.Text = lesson.Subject;
+            lessonPanel.Controls.Add(subjectTextBox);
+            //Person
+            Label personLabel = new Label();
+            personLabel.Location = new Point(lessonPanel.Width * 4 / 5, 0);
+            personLabel.Width = lessonPanel.Width / 5;
+            personLabel.Height = lessonPanel.Height;
+            personLabel.TextAlign = ContentAlignment.MiddleCenter;
+            personLabel.BorderStyle = BorderStyle.Fixed3D;
+            personLabel.BackColor = Color.White;
+            personLabel.Text = lesson.PersonName;
+            lessonPanel.Controls.Add(personLabel);
+            //Render panel
+            lessonPanel.Location = new Point(0, lessonPanel.Height * mainSchedulePanel.Controls.Count);
+            mainSchedulePanel.Height += lessonPanel.Height;
+            this.Location = new Point(this.Location.X, this.Location.Y - lessonPanel.Height);
+            this.Height += lessonPanel.Height;
+            mainSchedulePanel.Controls.Add(lessonPanel);
         }
 
         #region Методы, отвечающие за скрытие формы
@@ -103,5 +174,16 @@ namespace cleancode.bot.schedule.tray
             this.Hide();
         }
         #endregion
+
+        private void groupLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            string detailFormScheduleUrl = String.Format("{0}?gr={1}", Constants.DefaultPrintFormBaseUrl, _settings.GroupId);
+            Process.Start(detailFormScheduleUrl);
+        }
+
+        private void tomorrowLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+
+        }
     }
 }

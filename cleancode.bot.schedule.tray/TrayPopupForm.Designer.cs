@@ -33,6 +33,8 @@ namespace cleancode.bot.schedule.tray
             this.closeLinkLabel = new System.Windows.Forms.LinkLabel();
             this.groupLabel = new System.Windows.Forms.Label();
             this.groupLinkLabel = new System.Windows.Forms.LinkLabel();
+            this.tomorrowLinkLabel = new System.Windows.Forms.LinkLabel();
+            this.mainSchedulePanel = new System.Windows.Forms.Panel();
             this.SuspendLayout();
             // 
             // hideTimer
@@ -41,8 +43,8 @@ namespace cleancode.bot.schedule.tray
             // 
             // closeLinkLabel
             // 
-            this.closeLinkLabel.AutoSize = true;
-            this.closeLinkLabel.Location = new System.Drawing.Point(231, 253);
+            this.closeLinkLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.closeLinkLabel.Location = new System.Drawing.Point(234, 38);
             this.closeLinkLabel.Name = "closeLinkLabel";
             this.closeLinkLabel.Size = new System.Drawing.Size(51, 13);
             this.closeLinkLabel.TabIndex = 0;
@@ -66,13 +68,37 @@ namespace cleancode.bot.schedule.tray
             this.groupLinkLabel.Name = "groupLinkLabel";
             this.groupLinkLabel.Size = new System.Drawing.Size(0, 13);
             this.groupLinkLabel.TabIndex = 2;
+            this.groupLinkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.groupLinkLabel_LinkClicked);
+            // 
+            // tomorrowLinkLabel
+            // 
+            this.tomorrowLinkLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.tomorrowLinkLabel.Location = new System.Drawing.Point(12, 38);
+            this.tomorrowLinkLabel.Name = "tomorrowLinkLabel";
+            this.tomorrowLinkLabel.Size = new System.Drawing.Size(59, 13);
+            this.tomorrowLinkLabel.TabIndex = 3;
+            this.tomorrowLinkLabel.TabStop = true;
+            this.tomorrowLinkLabel.Text = "На завтра";
+            this.tomorrowLinkLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.tomorrowLinkLabel_LinkClicked);
+            // 
+            // mainSchedulePanel
+            // 
+            this.mainSchedulePanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.mainSchedulePanel.Location = new System.Drawing.Point(15, 25);
+            this.mainSchedulePanel.Name = "mainSchedulePanel";
+            this.mainSchedulePanel.Size = new System.Drawing.Size(270, 0);
+            this.mainSchedulePanel.TabIndex = 4;
             // 
             // TrayPopupForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(294, 275);
+            this.ClientSize = new System.Drawing.Size(294, 60);
             this.ControlBox = false;
+            this.Controls.Add(this.mainSchedulePanel);
+            this.Controls.Add(this.tomorrowLinkLabel);
             this.Controls.Add(this.groupLinkLabel);
             this.Controls.Add(this.groupLabel);
             this.Controls.Add(this.closeLinkLabel);
@@ -96,5 +122,7 @@ namespace cleancode.bot.schedule.tray
         private System.Windows.Forms.LinkLabel closeLinkLabel;
         private System.Windows.Forms.Label groupLabel;
         private System.Windows.Forms.LinkLabel groupLinkLabel;
+        private System.Windows.Forms.LinkLabel tomorrowLinkLabel;
+        private System.Windows.Forms.Panel mainSchedulePanel;
     }
 }
