@@ -44,7 +44,7 @@ namespace cleancode.bot.schedule.tray
             // closeLinkLabel
             // 
             this.closeLinkLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.closeLinkLabel.Location = new System.Drawing.Point(234, 38);
+            this.closeLinkLabel.Location = new System.Drawing.Point(413, 38);
             this.closeLinkLabel.Name = "closeLinkLabel";
             this.closeLinkLabel.Size = new System.Drawing.Size(51, 13);
             this.closeLinkLabel.TabIndex = 0;
@@ -88,14 +88,14 @@ namespace cleancode.bot.schedule.tray
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.mainSchedulePanel.Location = new System.Drawing.Point(15, 25);
             this.mainSchedulePanel.Name = "mainSchedulePanel";
-            this.mainSchedulePanel.Size = new System.Drawing.Size(270, 0);
+            this.mainSchedulePanel.Size = new System.Drawing.Size(449, 0);
             this.mainSchedulePanel.TabIndex = 4;
             // 
             // TrayPopupForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(294, 60);
+            this.ClientSize = new System.Drawing.Size(473, 60);
             this.ControlBox = false;
             this.Controls.Add(this.mainSchedulePanel);
             this.Controls.Add(this.tomorrowLinkLabel);
@@ -106,6 +106,7 @@ namespace cleancode.bot.schedule.tray
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "TrayPopupForm";
+            this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "TrayPopupForm";

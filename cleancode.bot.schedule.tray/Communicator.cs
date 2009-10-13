@@ -31,14 +31,9 @@ namespace cleancode.bot.schedule.tray
             return (HttpWebResponse)request.GetResponse();
         }
 
-        private HttpWebResponse _getSchedule()
+        public AnswerData GetSchedule(DateTime date)
         {
-            return _getSchedule(DateTime.Now);
-        }
-
-        public AnswerData GetSchedule()
-        {
-            HttpWebResponse response = _getSchedule();
+            HttpWebResponse response = _getSchedule(date);
             StreamReader sr = new StreamReader(response.GetResponseStream());
             string data = sr.ReadToEnd();
             sr.Close();
@@ -52,17 +47,26 @@ namespace cleancode.bot.schedule.tray
                 jsonObj["data"].Value<int>("week_number"),
                 jsonObj["data"].Value<string>("day")
             );
-            foreach (JToken tLesson in jsonObj["data"].Value<JArray>("lessons").Children())
+
+            if (answer.Status == Status.Success)
             {
-                Lesson lesson = new Lesson(
-                    tLesson.Value<string>("time"),
-                    tLesson.Value<string>("place"),
-                    tLesson.Value<string>("subject"),
-                    tLesson.Value<string>("person_name")
-                );
-                answer.Lessons.Add(lesson);
+                foreach (JToken tLesson in jsonObj["data"].Value<JArray>("lessons").Children())
+                {
+                    Lesson lesson = new Lesson(
+                        tLesson.Value<string>("time"),
+                        tLesson.Value<string>("place"),
+                        tLesson.Value<string>("subject"),
+                        tLesson.Value<string>("person_name")
+                    );
+                    answer.Lessons.Add(lesson);
+                }
             }
             return answer;
+        }
+
+        public AnswerData GetSchedule()
+        {
+            return GetSchedule(DateTime.Today);
         }
     }
 }

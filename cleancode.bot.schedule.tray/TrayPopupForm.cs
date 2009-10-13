@@ -12,6 +12,10 @@ namespace cleancode.bot.schedule.tray
 {
     public partial class TrayPopupForm : Form
     {
+        private const int _trayFormWidth = 473;
+        private const int _trayFormHeight = 60;
+        private const int _lessonControlHeight = 25;
+
         NotifyIcon _trayIcon;
         Settings _settings;
 
@@ -20,16 +24,28 @@ namespace cleancode.bot.schedule.tray
         public TrayPopupForm()
         {
             InitializeComponent();
-            
+
+            this.Width = _trayFormWidth;
+            this.Height = _trayFormHeight;
+
             this._settings = Settings.Deserialize(Constants.SaveSettingsFileName);
-            this.groupLinkLabel.Text = this._settings.GroupId;
+            groupLinkLabel.Text = this._settings.GroupId;
             _communicator = new Communicator(this._settings);
-            this.hideTimer.Tick += new EventHandler(hideTimer_Tick);
+            hideTimer.Tick += new EventHandler(hideTimer_Tick);
 
             this.Location = new Point(
                 Screen.PrimaryScreen.WorkingArea.Width - this.Width,
                 Screen.PrimaryScreen.WorkingArea.Height - this.Height);
             _initTrayIcon();
+
+            this.Load += new EventHandler(TrayPopupForm_Load);
+        }
+
+        private void TrayPopupForm_Load(object sender, EventArgs e)
+        {
+            //this.Hide();
+            this.WindowState = FormWindowState.Normal;
+            _getAndRenderSchedule(DateTime.Today);
         }
 
         #region Инициалзизация иконки в трее
@@ -71,42 +87,34 @@ namespace cleancode.bot.schedule.tray
             if(MessageBox.Show("Вы действительно желаете выйти?", "Выход", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 Application.Exit();
         }
-
-        void _trayIcon_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
-                if (this._settings.IsEmpty())
-                    _showSettingsEvent(null, EventArgs.Empty);
-
-                _renderSchedule(_communicator.GetSchedule());
-
-                this.WindowState = FormWindowState.Normal;
-                this.Show();
-                this.Focus();
-                //hideTimer.Enabled = true;
-            }
-        }
         #endregion
 
+        #region Методы, отвечающие за отрисовку расписания
         private void _renderSchedule(AnswerData schedule)
         {
-            this.WindowState = FormWindowState.Normal;
+            _clearLessons();
             foreach (Lesson lesson in schedule.Lessons)
             {
                 _renderLesson(lesson);
             }
-            closeLinkLabel.BringToFront();
-            tomorrowLinkLabel.BringToFront();
+            _showForm();
+        }
+
+        private void _clearLessons()
+        {
+            mainSchedulePanel.Height -= mainSchedulePanel.Controls.Count * _lessonControlHeight;
+            mainSchedulePanel.Controls.Clear();
+            this.Height = _trayFormHeight;
+            this.Location = new Point(
+                Screen.PrimaryScreen.WorkingArea.Width - this.Width,
+                Screen.PrimaryScreen.WorkingArea.Height - this.Height);
         }
 
         private void _renderLesson(Lesson lesson)
         {
-            int height = 25;
-
             Panel lessonPanel = new Panel();
             lessonPanel.Width = mainSchedulePanel.Width;
-            lessonPanel.Height = height;
+            lessonPanel.Height = _lessonControlHeight;
             //Time
             Label timeLabel = new Label();
             timeLabel.Location = new Point(0, 0);
@@ -154,26 +162,52 @@ namespace cleancode.bot.schedule.tray
             this.Height += lessonPanel.Height;
             mainSchedulePanel.Controls.Add(lessonPanel);
         }
+        #endregion
 
-        #region Методы, отвечающие за скрытие формы
+        #region Методы, отвечающие за скрытие и показ формы
         private void closeLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             _hideForm();
         }
 
-        void hideTimer_Tick(object sender, EventArgs e)
+        private void hideTimer_Tick(object sender, EventArgs e)
         {
             _hideForm();
-            this.hideTimer.Enabled = false;
         }
 
-        void _hideForm()
+        private void _hideForm()
         {
-            this.hideTimer.Enabled = false;
-            this.WindowState = FormWindowState.Minimized;
+            hideTimer.Enabled = false;
             this.Hide();
         }
+
+        private void _showForm()
+        {
+            this.Show();
+            tomorrowLinkLabel.BringToFront();
+            closeLinkLabel.BringToFront();
+            this.Focus();
+            hideTimer.Enabled = true;
+        }
         #endregion
+
+        private void _getAndRenderSchedule(DateTime date)
+        {
+            if (this._settings.IsEmpty())
+                _showSettingsEvent(null, EventArgs.Empty);
+
+            _renderSchedule(_communicator.GetSchedule(date));
+
+            _showForm();
+        }
+
+        void _trayIcon_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                _getAndRenderSchedule(DateTime.Today);   
+            }
+        }
 
         private void groupLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
@@ -183,7 +217,7 @@ namespace cleancode.bot.schedule.tray
 
         private void tomorrowLinkLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-
+            _getAndRenderSchedule(DateTime.Today.AddDays(1));
         }
     }
 }
