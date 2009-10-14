@@ -39,7 +39,7 @@ namespace cleancode.bot.schedule.tray
             // 
             // hideTimer
             // 
-            this.hideTimer.Interval = 10000;
+            this.hideTimer.Interval = 5000;
             // 
             // closeLinkLabel
             // 
@@ -83,8 +83,7 @@ namespace cleancode.bot.schedule.tray
             // 
             // mainSchedulePanel
             // 
-            this.mainSchedulePanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
+            this.mainSchedulePanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.mainSchedulePanel.Location = new System.Drawing.Point(15, 25);
             this.mainSchedulePanel.Name = "mainSchedulePanel";
@@ -102,6 +101,7 @@ namespace cleancode.bot.schedule.tray
             this.Controls.Add(this.groupLinkLabel);
             this.Controls.Add(this.groupLabel);
             this.Controls.Add(this.closeLinkLabel);
+            this.DoubleBuffered = true;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -111,7 +111,6 @@ namespace cleancode.bot.schedule.tray
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "TrayPopupForm";
             this.TopMost = true;
-            this.WindowState = System.Windows.Forms.FormWindowState.Minimized;
             this.ResumeLayout(false);
             this.PerformLayout();
 

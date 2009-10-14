@@ -16,6 +16,11 @@ namespace cleancode.bot.schedule.tray
         private const int _trayFormHeight = 60;
         private const int _lessonControlHeight = 25;
 
+        private const int _popupFormBorderWidth = 3;
+        private readonly Pen _popupFormBorderPen = new Pen(Color.Black, _popupFormBorderWidth);
+
+        private Rectangle _tempBorderRectangle = new Rectangle(0, 0, 0, 0);
+
         NotifyIcon _trayIcon;
         Settings _settings;
 
@@ -31,21 +36,75 @@ namespace cleancode.bot.schedule.tray
             this._settings = Settings.Deserialize(Constants.SaveSettingsFileName);
             groupLinkLabel.Text = this._settings.GroupId;
             _communicator = new Communicator(this._settings);
+
+            this.MouseEnter += new EventHandler(delegate(object sender, EventArgs e) { this.hideTimer.Enabled = false; });
+            this.MouseLeave += new EventHandler(delegate(object sender, EventArgs e)
+            {
+                Point cursorPosition = Cursor.Position;
+                if (
+                    (cursorPosition.X < this.Location.X || cursorPosition.X > this.Location.X + this.Width) ||
+                    (cursorPosition.Y < this.Location.Y || cursorPosition.Y > this.Location.Y + this.Height)
+                    )
+                {
+                    this.hideTimer.Enabled = true;
+                }
+            });
             hideTimer.Tick += new EventHandler(hideTimer_Tick);
 
-            this.Location = new Point(
-                Screen.PrimaryScreen.WorkingArea.Width - this.Width,
-                Screen.PrimaryScreen.WorkingArea.Height - this.Height);
+            _setPopupFormLocation();
             _initTrayIcon();
 
-            this.Load += new EventHandler(TrayPopupForm_Load);
+            this.Paint += new PaintEventHandler(TrayPopupForm_Paint);
+            this.Shown += new EventHandler(TrayPopupForm_Shown);
         }
 
-        private void TrayPopupForm_Load(object sender, EventArgs e)
+        void TrayPopupForm_Paint(object sender, PaintEventArgs e)
         {
-            //this.Hide();
-            this.WindowState = FormWindowState.Normal;
+            e.Graphics.Clear(this.BackColor);
+            e.Graphics.DrawRectangle(_popupFormBorderPen, 0, 0, this.Width - _popupFormBorderWidth, this.Height - _popupFormBorderWidth);
+        }
+
+        void TrayPopupForm_Shown(object sender, EventArgs e)
+        {
             _getAndRenderSchedule(DateTime.Today);
+            Point cursorPosition = Cursor.Position;
+            if (
+                (cursorPosition.X < this.Location.X || cursorPosition.X > this.Location.X + this.Width) ||
+                (cursorPosition.Y < this.Location.Y || cursorPosition.Y > this.Location.Y + this.Height)
+                )
+            {
+                this.hideTimer.Enabled = true;
+            }
+        }
+
+        private void _setPopupFormLocation()
+        {
+            Point location = new Point();
+            switch (_settings.PopupFormPosition)
+            {
+                case PopupFormPosition.TopLeft:
+                    location.X = 0;
+                    location.Y = 0;
+                    break;
+                case PopupFormPosition.BottomLeft:
+                    location.X = 0;
+                    location.Y = Screen.PrimaryScreen.WorkingArea.Height - this.Height;
+                    break;
+                case PopupFormPosition.TopRight:
+                    location.X = Screen.PrimaryScreen.WorkingArea.Width - this.Width;
+                    location.Y = 0;
+                    break;
+                case PopupFormPosition.BottomRight:
+                default:
+                    location.X = Screen.PrimaryScreen.WorkingArea.Width - this.Width;
+                    location.Y = Screen.PrimaryScreen.WorkingArea.Height - this.Height;
+                    break;
+                case PopupFormPosition.MiddleCenter:
+                    location.X = (Screen.PrimaryScreen.WorkingArea.Width - this.Width) / 2;
+                    location.Y = (Screen.PrimaryScreen.WorkingArea.Height - this.Height) / 2;
+                    break;
+            }
+            this.Location = location;
         }
 
         #region Инициалзизация иконки в трее
@@ -84,7 +143,7 @@ namespace cleancode.bot.schedule.tray
 
         private void _exitEvent(object sender, EventArgs e)
         {
-            if(MessageBox.Show("Вы действительно желаете выйти?", "Выход", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            if (MessageBox.Show("Вы действительно желаете выйти?", "Выход", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 Application.Exit();
         }
         #endregion
@@ -105,9 +164,7 @@ namespace cleancode.bot.schedule.tray
             mainSchedulePanel.Height -= mainSchedulePanel.Controls.Count * _lessonControlHeight;
             mainSchedulePanel.Controls.Clear();
             this.Height = _trayFormHeight;
-            this.Location = new Point(
-                Screen.PrimaryScreen.WorkingArea.Width - this.Width,
-                Screen.PrimaryScreen.WorkingArea.Height - this.Height);
+            _setPopupFormLocation();
         }
 
         private void _renderLesson(Lesson lesson)
@@ -157,9 +214,9 @@ namespace cleancode.bot.schedule.tray
             lessonPanel.Controls.Add(personLabel);
             //Render panel
             lessonPanel.Location = new Point(0, lessonPanel.Height * mainSchedulePanel.Controls.Count);
-            mainSchedulePanel.Height += lessonPanel.Height;
-            this.Location = new Point(this.Location.X, this.Location.Y - lessonPanel.Height);
             this.Height += lessonPanel.Height;
+            _setPopupFormLocation();
+            mainSchedulePanel.Height += lessonPanel.Height;
             mainSchedulePanel.Controls.Add(lessonPanel);
         }
         #endregion
@@ -184,8 +241,6 @@ namespace cleancode.bot.schedule.tray
         private void _showForm()
         {
             this.Show();
-            tomorrowLinkLabel.BringToFront();
-            closeLinkLabel.BringToFront();
             this.Focus();
             hideTimer.Enabled = true;
         }
@@ -205,7 +260,7 @@ namespace cleancode.bot.schedule.tray
         {
             if (e.Button == MouseButtons.Left)
             {
-                _getAndRenderSchedule(DateTime.Today);   
+                _getAndRenderSchedule(DateTime.Today);
             }
         }
 

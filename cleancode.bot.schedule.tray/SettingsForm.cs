@@ -25,7 +25,25 @@ namespace cleancode.bot.schedule.tray
             if (this._settings != null)
             {
                 this.groupTextBox.Text = _settings.GroupId;
+                foreach (RadioButton radio in onScreenPositionGroupBox.Controls)
+                {
+                    if ((string)radio.Tag == _settings.PopupFormPosition.ToString())
+                    {
+                        radio.Checked = true;
+                        break;
+                    }
+                }
             }
+            else
+            {
+                _fillWithDefaultValues();
+            }
+        }
+
+        private void _fillWithDefaultValues()
+        {
+            //Устанавливаем переключатель позиции всплывающего окна в правый нижний угол
+            ((RadioButton)positionBottomRightRadioButton).Checked = true;
         }
 
         private void saveButton_Click(object sender, EventArgs e)
@@ -34,6 +52,16 @@ namespace cleancode.bot.schedule.tray
             this._settings.SceduleId = Constants.DefaultScheduleId;
             this._settings.DatasourceUrl = Constants.DefaultDatasourceUrl;
             this._settings.GroupId = this.groupTextBox.Text;
+            string positionPresentation = string.Empty;
+            foreach (RadioButton radio in onScreenPositionGroupBox.Controls)
+            {
+                if(radio.Checked)
+                {
+                    positionPresentation = (string)radio.Tag;
+                    break;
+                }
+            }
+            this._settings.PopupFormPosition = (PopupFormPosition)Enum.Parse(typeof(PopupFormPosition), positionPresentation);
 
             this._settings.Serialize(Constants.SaveSettingsFileName);
             this._settingsTransferAction.Invoke(this._settings);
