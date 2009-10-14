@@ -61,7 +61,7 @@ namespace cleancode.bot.schedule.tray
         void TrayPopupForm_Paint(object sender, PaintEventArgs e)
         {
             e.Graphics.Clear(this.BackColor);
-            e.Graphics.DrawRectangle(_popupFormBorderPen, 0, 0, this.Width - _popupFormBorderWidth, this.Height - _popupFormBorderWidth);
+            e.Graphics.DrawRectangle(_popupFormBorderPen, 0, 0, this.Width - _popupFormBorderWidth * 2 - 1, this.Height - _popupFormBorderWidth * 2 - 1);
         }
 
         void TrayPopupForm_Shown(object sender, EventArgs e)
